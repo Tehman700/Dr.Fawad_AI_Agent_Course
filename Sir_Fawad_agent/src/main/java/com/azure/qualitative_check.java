@@ -27,10 +27,6 @@ class DirectoryNode {
 }
 
 
-
-
-
-
 class DirectoryParser {
     private static void showAutoCloseDialog(String message, String title, int messageType) {
         JOptionPane optionPane = new JOptionPane(message, messageType);
@@ -233,7 +229,7 @@ class DirectoryParser {
 
 
 
-    // VALIDATION FUNCTION TO CHECK EITHER THE SPECIFIC FILDER IS EMPTY OR NOT IF EMTRY THEN DON'T GO FURTHER OTHERWISE GO ON TO FIND TARGET FUNTION THAT IS RETURNING FILES FROM THE FOLDER
+    // VALIDATION FUNCTION TO CHECK EITHER THE SPECIFIC FOLDER IS EMPTY OR NOT IF ENTRY THEN DON'T GO FURTHER OTHERWISE GO ON TO FIND TARGET FUNCTION THAT IS RETURNING FILES FROM THE FOLDER
     public static String getFilesInFolder(String rootDirectory, String targetName) {
         File rootDir = new File(rootDirectory);
         if (!rootDir.exists() || !rootDir.isDirectory()) {
