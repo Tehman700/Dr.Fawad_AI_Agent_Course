@@ -36,9 +36,6 @@ public class FilenameSimilarityCheck {
             System.out.println(file);
         }
 
-
-
-
         System.out.println("\n\n\n\n\n\n");
 
         List<String> extraFiles = new ArrayList<>(sampled);
@@ -108,6 +105,7 @@ public class FilenameSimilarityCheck {
             cleanFileNames.add(cleanedFile);
         }
 
+        Collections.sort(cleanFileNames);
         return cleanFileNames;
     }
 
@@ -128,7 +126,7 @@ public class FilenameSimilarityCheck {
 
             cleanFileNames.add(cleanedFile);
         }
-
+        Collections.sort(cleanFileNames);
         return cleanFileNames;
     }
 }
