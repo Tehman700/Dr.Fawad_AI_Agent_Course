@@ -4,8 +4,8 @@ import java.util.*;
 import java.io.File;
 
 public class FilenameSimilarityCheck {
-    private static final String ROOT_FOLDER = "D:\\Dr.Fawad Sample\\first\\Object Oriented Programming\\Object Oriented Programming (Theory)";
-    private static final String SAMPLE_FOLDER = "D:\\Sample Theory";
+    private static final String ROOT_FOLDER = "D:\\Dr.Fawad Sample";
+    private static final String SAMPLE_FOLDER = "D:\\hehehehe";
 
     public static void main(String[] args) {
         // For Actual Files names
@@ -53,6 +53,9 @@ public class FilenameSimilarityCheck {
                         file.contains("theoryreviewreport") ||
                         file.contains("obesheettheory") ||
                         file.contains("obe-sheet") ||
+                        file.contains("attendence") ||
+                        file.contains("studentsattendence")||
+                        file.contains("courseattendence") ||
                         file.contains("obe_report") ||
                         file.contains("obeanalysis") ||
                         file.contains("outcome-basededucation") ||
