@@ -21,10 +21,11 @@ class GUI {
     private JFrame frame;
     private JTextArea textArea;
     private JScrollPane scrollPane;
-    private JButton chooseFileButton, chooseSaveLocationButton, runMainButton, exitButton;
-    private JLabel filePathLabel, savePathLabel;
+    private JButton chooseFileButton, chooseSaveLocationButton, runMainButton, exitButton,choosequantitativesearch;
+    private JLabel filePathLabel, savePathLabel, quantPathLabel;
     private String selectedFilePath = ""; // Stores the selected file path
     private String selectedSavePath = ""; // Stores the selected save path for PDF
+    public static String selectedQuantitativePath = "";
 
 
     public GUI() {
@@ -53,12 +54,17 @@ class GUI {
         savePathLabel.setFont(new Font("Arial", Font.PLAIN,     20));
         frame.add(savePathLabel, BorderLayout.CENTER);
 
+
         // Create FileChooser Button
         chooseFileButton = new JButton("Select Directory");
         chooseFileButton.setFont(new Font("Arial", Font.BOLD, 14));
         // Create Save Location Button
         chooseSaveLocationButton = new JButton("Select Save Location");
         chooseSaveLocationButton.setFont(new Font("Arial", Font.BOLD, 14));
+
+        choosequantitativesearch = new JButton("Quantitative");
+        choosequantitativesearch.setFont(new Font("Arial", Font.BOLD,14));
+
 
         // Create Run Button
         runMainButton = new JButton("Analyze");
@@ -88,6 +94,28 @@ class GUI {
                         selectedFilePath = selectedFile.getAbsolutePath();
                         filePathLabel.setText("Selected: " + selectedFilePath);
                         runMainButton.setEnabled(true); // Enable run button
+
+                    }
+                }
+            }
+        });
+        choosequantitativesearch.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY); // Allow only folder selection
+                fileChooser.setAcceptAllFileFilterUsed(false);
+
+                int returnValue = fileChooser.showOpenDialog(frame);
+
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    if (selectedFile != null) {
+                        selectedQuantitativePath = selectedFile.getAbsolutePath();
+                        choosequantitativesearch.setBackground(Color.GREEN); // Change button color to green
+                        FilenameSimilarityCheck ok = new FilenameSimilarityCheck();
+                        ok.ft();
+
                     }
                 }
             }
@@ -138,6 +166,7 @@ class GUI {
         panel.add(chooseSaveLocationButton);
         panel.add(runMainButton);
         panel.add(exitButton);
+        panel.add(choosequantitativesearch);
 
         // Make Frame Visible
         frame.setVisible(true);
