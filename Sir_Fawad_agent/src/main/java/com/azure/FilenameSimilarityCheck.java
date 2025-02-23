@@ -4,15 +4,13 @@ import java.util.*;
 import java.io.File;
 
 public class FilenameSimilarityCheck {
-    private static final String ROOT_FOLDER = "D:\\Dr.Fawad Sample";
+    private static final String ROOT_FOLDER = "D:\\Dr.Fawad Sample\\first\\Object Oriented Programming\\Object Oriented Programming (Theory)";
     private static final String SAMPLE_FOLDER = "D:\\hehehehe";
 
     public static void main(String[] args) {
         // For Actual Files names
         List<String> fileList = new ArrayList<>();
         fetchFiles(new File(ROOT_FOLDER), fileList);
-
-
 
         // For the sample Files names
         List<String> sample_fileList = new ArrayList<>();
@@ -63,15 +61,15 @@ public class FilenameSimilarityCheck {
                         file.contains("theoryreview") ||
                         file.contains("reviewreport") ||
                         file.contains("objectorientedtheory") ||
-                        file.contains("obepreview")){
-                    continue;
+                        file.contains("obepreview")) {
+
+                continue;
                 }
-                else{
+            else{
                 System.out.println(file);
                 }
             }
         }
-
 
     }
 
