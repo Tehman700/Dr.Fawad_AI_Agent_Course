@@ -518,17 +518,14 @@ class SecondGUI extends JFrame {
     private JPanel createButtonPanel() {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
         buttonPanel.setBackground(BG_COLOR);
+        logTextArea.setEditable(false);
 
         doQuantitativeBtn = createStyledButton("Run Quantitative Analysis", ACCENT_COLOR);
         doQuantitativeBtn.setFont(new Font("Segoe UI", Font.BOLD, 16));
         doQuantitativeBtn.setEnabled(false);
-        doQuantitativeBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                qualitative obj = new qualitative();
-                obj.starter();
-            }
-        });
+        Quantitative_analysis obj = new Quantitative_analysis(logTextArea);
+
+        doQuantitativeBtn.addActionListener(e -> obj.starter());
 
         JButton clearBtn = createStyledButton("Clear Selections", new Color(150, 150, 150));
         clearBtn.addActionListener(e -> {
@@ -538,6 +535,7 @@ class SecondGUI extends JFrame {
             samplePathLabel.setText("No sample folder selected");
             logAction("Selections cleared.");
             updateButtonState();
+            logTextArea.setText("");
         });
 
         buttonPanel.add(doQuantitativeBtn);

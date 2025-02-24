@@ -1,9 +1,15 @@
 package com.azure;
 
+import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
 
-class qualitative {
+public class Quantitative_analysis {
+    private JTextArea outputTextArea; // Declare JTextArea
+    public Quantitative_analysis(JTextArea outputTextArea) {
+        this.outputTextArea = outputTextArea;
+    }
+
     ArrayList<String> missing_files=new ArrayList<>();
     ArrayList<String> expectd_Dir_Of_mising_file=new ArrayList<>();
 
@@ -201,54 +207,47 @@ class qualitative {
 
 
 
-
-    public void starter(){
-
-        qualitative fuzzyRegexSearch=new qualitative();
+    public void starter() {
+        Quantitative_analysis fuzzyRegexSearch = new Quantitative_analysis(outputTextArea);
 
         String rootDirectory = SecondGUI.originalFolderPath;
+        String SampleFolder_root_Dir = SecondGUI.sampleFolderPath;
 
-        String SampleFolder_root_Dir=SecondGUI.sampleFolderPath;
-        // Create a File object
         File file = new File(rootDirectory);
-        File file_sample_folder=new File(SampleFolder_root_Dir);
+        File file_sample_folder = new File(SampleFolder_root_Dir);
 
+        String Target_sample_Folder_path = fuzzyRegexSearch.searchFolder(file, SampleFolder_root_Dir);
 
-
-        // Get the name of the current folder or file
-        String currentFolder = file.getName();
-        String Target_sample_Folder_path=fuzzyRegexSearch.searchFolder(file,SampleFolder_root_Dir);
-//        System.out.print("\ntarget directory   : "+ Target_sample_Folder_path+"\n");
-
-        if (Target_sample_Folder_path!=null){
-
-            fuzzyRegexSearch.traverseDirectory(Target_sample_Folder_path,rootDirectory);
-
-        }
-        else {
-            fuzzyRegexSearch.traverseDirectory(SampleFolder_root_Dir,rootDirectory);
-
+        if (Target_sample_Folder_path != null) {
+            fuzzyRegexSearch.traverseDirectory(Target_sample_Folder_path, rootDirectory);
+        } else {
+            fuzzyRegexSearch.traverseDirectory(SampleFolder_root_Dir, rootDirectory);
         }
 
-        System.out.print("                    MISSING FILES/FOLDERS");
-        for(String S: fuzzyRegexSearch.missing_files){
+        // Store output in a single string variable
+        StringBuilder output = new StringBuilder();
+        output.append("MISSING FILES/FOLDERS:\n");
 
+        for (int i = 0; i < fuzzyRegexSearch.missing_files.size(); i++) {
+            output.append(fuzzyRegexSearch.missing_files.get(i))
+                    .append("____ Expected in Folder: ")
+                    .append(fuzzyRegexSearch.expectd_Dir_Of_mising_file.get(i))
+                    .append("\n");
         }
 
-        for (int S=0; S<fuzzyRegexSearch.missing_files.size(); S++){
+        // Print or use the output string as needed
+        System.out.println(output.toString());
 
-            System.out.print("\n "+fuzzyRegexSearch.missing_files.get(S)+"____");
-            System.out.print(" Expected in Folder : ");
-            System.out.print(" "+fuzzyRegexSearch.expectd_Dir_Of_mising_file.get(S)+" \n");
+        // You can store the result in a variable
+        String finalOutput = output.toString();
+        SwingUtilities.invokeLater(() -> outputTextArea.setText(output.toString()));
 
-        }
     }
 
 
 
     public static void main(String[] args) {
-        qualitative obj = new qualitative();
-        obj.starter();
+
     }
 
 }
