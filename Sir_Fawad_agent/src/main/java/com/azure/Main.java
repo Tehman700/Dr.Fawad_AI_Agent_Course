@@ -10,8 +10,12 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -201,34 +205,7 @@ class GUI {
             }
         });
 
-        chooseQuantitativeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                fileChooser.setAcceptAllFileFilterUsed(false);
-
-                int returnValue = fileChooser.showOpenDialog(frame);
-
-                if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    if (selectedFile != null) {
-                        selectedQuantitativePath = selectedFile.getAbsolutePath();
-                        quantPathLabel.setText("Quantitative Source: " + selectedQuantitativePath);
-                        chooseQuantitativeButton.setBackground(SUCCESS_COLOR);
-
-                        // Assuming the FilenameSimilarityCheck class exists
-                        try {
-
-                            // WILL PUT SOMETHING HERE FOR QUANTITATIVE SEARCH   25-20-2025  AT 2:06 AM
-
-                } catch (Exception ex) {
-                            showError("Error performing similarity check: " + ex.getMessage());
-                        }
-                    }
-                }
-            }
-        });
+        chooseQuantitativeButton.addActionListener(e -> new SecondGUI());
 
         sidePanel.add(chooseFileButton);
         sidePanel.add(chooseSaveLocationButton);
@@ -390,6 +367,331 @@ class GUI {
         SwingUtilities.invokeLater(() -> new GUI());
     }
 }
+
+class SecondGUI extends JFrame {
+    public static String originalFolderPath = "";
+    public static String sampleFolderPath = "";
+    private JTextArea logTextArea;
+    private JLabel originalPathLabel;
+    private JLabel samplePathLabel;
+    private JButton doQuantitativeBtn;
+
+    // Color scheme
+    private final Color PRIMARY_COLOR = new Color(75, 119, 190);
+    private final Color SECONDARY_COLOR = new Color(92, 145, 232);
+    private final Color ACCENT_COLOR = new Color(245, 166, 35);
+    private final Color BG_COLOR = new Color(240, 245, 250);
+    private final Color TEXT_COLOR = new Color(50, 63, 87);
+    private final Color SUCCESS_COLOR = new Color(46, 204, 113);
+
+    public SecondGUI() {
+        // Set look and feel
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Basic frame setup
+        setTitle("Quantitative Analysis Tool");
+        setSize(850, 560);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
+        getContentPane().setBackground(BG_COLOR);
+        setLayout(new BorderLayout(10, 10));
+
+        // Create and add main panels
+        add(createHeaderPanel(), BorderLayout.NORTH);
+        add(createMainPanel(), BorderLayout.CENTER);
+        add(createButtonPanel(), BorderLayout.SOUTH);
+
+        // Set initial button state
+        updateButtonState();
+
+        // Show the frame
+        setVisible(true);
+    }
+
+    private JPanel createHeaderPanel() {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(PRIMARY_COLOR);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+
+        JLabel titleLabel = new JLabel("Quantitative Analysis Tool");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setForeground(Color.WHITE);
+
+        headerPanel.add(titleLabel, BorderLayout.CENTER);
+
+        return headerPanel;
+    }
+
+    private JPanel createMainPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBackground(BG_COLOR);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+        // Path selection panel
+        JPanel pathPanel = new JPanel(new GridLayout(2, 1, 0, 10));
+        pathPanel.setBackground(BG_COLOR);
+
+        // Original path panel
+        JPanel originalPanel = new JPanel(new BorderLayout(10, 0));
+        originalPanel.setBackground(BG_COLOR);
+        originalPathLabel = new JLabel("No original folder selected");
+        originalPathLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        originalPathLabel.setBorder(createPathLabelBorder("Original Folder"));
+
+        JButton chooseOriginalBtn = createStyledButton("Browse", SECONDARY_COLOR);
+        chooseOriginalBtn.addActionListener(e -> {
+            String path = openFileChooser();
+            if (path != null) {
+                originalFolderPath = path;
+                originalPathLabel.setText(truncatePath(path));
+                originalPathLabel.setToolTipText(path);
+                updateButtonState();
+                logAction("Original folder selected: " + path);
+            }
+        });
+
+        originalPanel.add(originalPathLabel, BorderLayout.CENTER);
+        originalPanel.add(chooseOriginalBtn, BorderLayout.EAST);
+
+        // Sample path panel
+        JPanel samplePanel = new JPanel(new BorderLayout(10, 0));
+        samplePanel.setBackground(BG_COLOR);
+        samplePathLabel = new JLabel("No sample folder selected");
+        samplePathLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        samplePathLabel.setBorder(createPathLabelBorder("Sample Folder"));
+
+        JButton chooseSampleBtn = createStyledButton("Browse", SECONDARY_COLOR);
+        chooseSampleBtn.addActionListener(e -> {
+            String path = openFileChooser();
+            if (path != null) {
+                sampleFolderPath = path;
+                samplePathLabel.setText(truncatePath(path));
+                samplePathLabel.setToolTipText(path);
+                updateButtonState();
+                logAction("Sample folder selected: " + path);
+            }
+        });
+
+        samplePanel.add(samplePathLabel, BorderLayout.CENTER);
+        samplePanel.add(chooseSampleBtn, BorderLayout.EAST);
+
+        pathPanel.add(originalPanel);
+        pathPanel.add(samplePanel);
+
+        // Log text area panel
+        JPanel logPanel = new JPanel(new BorderLayout());
+        logPanel.setBackground(BG_COLOR);
+        logPanel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(SECONDARY_COLOR),
+                "Activity Log",
+                TitledBorder.DEFAULT_JUSTIFICATION,
+                TitledBorder.DEFAULT_POSITION,
+                new Font("Segoe UI", Font.BOLD, 14),
+                SECONDARY_COLOR
+        ));
+
+        logTextArea = new JTextArea();
+        logTextArea.setFont(new Font("Consolas", Font.PLAIN, 14));
+        logTextArea.setEditable(false);
+        logTextArea.setBackground(Color.WHITE);
+        logTextArea.setForeground(TEXT_COLOR);
+        logTextArea.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        JScrollPane scrollPane = new JScrollPane(logTextArea);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+
+        logPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Add both panels to main panel
+        mainPanel.add(pathPanel, BorderLayout.NORTH);
+        mainPanel.add(logPanel, BorderLayout.CENTER);
+
+        logAction("Application started. Please select folders to proceed.");
+
+        return mainPanel;
+    }
+
+    private JPanel createButtonPanel() {
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
+        buttonPanel.setBackground(BG_COLOR);
+
+        doQuantitativeBtn = createStyledButton("Run Quantitative Analysis", ACCENT_COLOR);
+        doQuantitativeBtn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        doQuantitativeBtn.setEnabled(false);
+        doQuantitativeBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                qualitative obj = new qualitative();
+                obj.starter();
+            }
+        });
+
+        JButton clearBtn = createStyledButton("Clear Selections", new Color(150, 150, 150));
+        clearBtn.addActionListener(e -> {
+            originalFolderPath = null;
+            sampleFolderPath = null;
+            originalPathLabel.setText("No original folder selected");
+            samplePathLabel.setText("No sample folder selected");
+            logAction("Selections cleared.");
+            updateButtonState();
+        });
+
+        buttonPanel.add(doQuantitativeBtn);
+        buttonPanel.add(clearBtn);
+
+        return buttonPanel;
+    }
+
+    private JButton createStyledButton(String text, Color color) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setMargin(new Insets(8, 15, 8, 15));
+
+        // Add hover effect
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(darken(color, 0.1f));
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(color);
+                }
+            }
+        });
+
+        return button;
+    }
+
+    private Border createPathLabelBorder(String title) {
+        return BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder(
+                        BorderFactory.createLineBorder(SECONDARY_COLOR),
+                        title,
+                        TitledBorder.DEFAULT_JUSTIFICATION,
+                        TitledBorder.DEFAULT_POSITION,
+                        new Font("Segoe UI", Font.BOLD, 14),
+                        SECONDARY_COLOR
+                ),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        );
+    }
+
+    private Color darken(Color color, float fraction) {
+        int red = Math.max(0, Math.round(color.getRed() * (1 - fraction)));
+        int green = Math.max(0, Math.round(color.getGreen() * (1 - fraction)));
+        int blue = Math.max(0, Math.round(color.getBlue() * (1 - fraction)));
+        return new Color(red, green, blue);
+    }
+
+    private String openFileChooser() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFolder = fileChooser.getSelectedFile();
+            return selectedFolder.getAbsolutePath();
+        }
+        return null;
+    }
+
+    private void updateButtonState() {
+        doQuantitativeBtn.setEnabled(originalFolderPath != null && sampleFolderPath != null);
+
+        if (doQuantitativeBtn.isEnabled()) {
+            doQuantitativeBtn.setBackground(ACCENT_COLOR);
+        } else {
+            doQuantitativeBtn.setBackground(new Color(180, 180, 180));
+        }
+    }
+
+    private void performQuantitative() {
+        logAction("Starting quantitative analysis...");
+        logAction("Original Folder: " + originalFolderPath);
+        logAction("Sample Folder: " + sampleFolderPath);
+
+        // Show working animation
+        doQuantitativeBtn.setEnabled(false);
+        doQuantitativeBtn.setText("Processing...");
+
+        // Simulate work with SwingWorker
+        SwingWorker<Void, String> worker = new SwingWorker<Void, String>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                // Simulate processing
+                for (int i = 0; i < 5; i++) {
+                    Thread.sleep(500);
+                    publish("Processing step " + (i+1) + " of 5...");
+                }
+                return null;
+            }
+
+            @Override
+            protected void process(java.util.List<String> chunks) {
+                // Update log with progress
+                for (String chunk : chunks) {
+                    logAction(chunk);
+                }
+            }
+
+            @Override
+            protected void done() {
+                // Complete the operation
+                logAction("Quantitative analysis completed successfully!");
+                doQuantitativeBtn.setText("Run Quantitative Analysis");
+                doQuantitativeBtn.setEnabled(true);
+
+                // Show completion message
+                JOptionPane.showMessageDialog(
+                        SecondGUI.this,
+                        "Quantitative analysis has been completed successfully.\n\n" +
+                                "Original Folder: " + originalFolderPath + "\n" +
+                                "Sample Folder: " + sampleFolderPath,
+                        "Analysis Complete",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            }
+        };
+
+        worker.execute();
+    }
+
+    private void logAction(String message) {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        logTextArea.append("[" + timestamp + "] " + message + "\n");
+        // Auto-scroll to the bottom
+        logTextArea.setCaretPosition(logTextArea.getDocument().getLength());
+    }
+
+    private String truncatePath(String path) {
+        if (path == null) return "";
+        if (path.length() <= 40) return path;
+
+        File file = new File(path);
+        String fileName = file.getName();
+        String parent = file.getParent();
+
+        if (parent != null && parent.length() > 30) {
+            parent = "..." + parent.substring(parent.length() - 30);
+        }
+
+        return parent + File.separator + fileName;
+    }
+}
+
 
 public class Main {
 
