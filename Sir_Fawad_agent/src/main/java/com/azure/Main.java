@@ -3,87 +3,167 @@ package com.azure;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-
-import org.apache.pdfbox.multipdf.PDFMergerUtility;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
-import java.util.jar.JarFile;
+
 
 class GUI {
+    // WE MADE GUI,BUT IT WAS JUST TO MAKE US IMPLEMENT THE FUNCTIONS, BUT THIS ENHANCED GUI IS MADE BY CLAUDE AI, HATS OFF TO IT  25-02-2025
+
     private JFrame frame;
     private JTextArea textArea;
     private JScrollPane scrollPane;
-    private JButton chooseFileButton, chooseSaveLocationButton, runMainButton, exitButton,choosequantitativesearch;
-    private JLabel filePathLabel, savePathLabel, quantPathLabel;
+    private JButton chooseFileButton, chooseSaveLocationButton, runMainButton, exitButton, chooseQuantitativeButton;
+    private JLabel filePathLabel, savePathLabel, quantPathLabel, logoLabel;
     private String selectedFilePath = ""; // Stores the selected file path
     private String selectedSavePath = ""; // Stores the selected save path for PDF
     public static String selectedQuantitativePath = "";
 
+    // Color scheme
+    private final Color PRIMARY_COLOR = new Color(41, 128, 185); // Blue
+    private final Color SECONDARY_COLOR = new Color(52, 152, 219); // Lighter blue
+    private final Color ACCENT_COLOR = new Color(230, 126, 34); // Orange
+    private final Color BG_COLOR = new Color(236, 240, 241); // Light gray
+    private final Color TEXT_COLOR = new Color(44, 62, 80); // Dark blue-gray
+    private final Color SUCCESS_COLOR = new Color(46, 204, 113); // Green
+    private final Color DANGER_COLOR = new Color(231, 76, 60); // Red
 
     public GUI() {
+        // Set look and feel to system default for better integration
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // Create Frame
         frame = new JFrame("Course Automated Analyzer");
-        frame.setSize(900, 550);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Ensure it closes properly
-        frame.setLayout(new BorderLayout());
+        frame.setSize(1000, 650);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout(10, 10));
+        frame.getContentPane().setBackground(BG_COLOR);
+
+        // Create header panel with logo
+        JPanel headerPanel = createHeaderPanel();
+        frame.add(headerPanel, BorderLayout.NORTH);
+
+        // Create Text Area with Scroll Pane
+        JPanel contentPanel = createContentPanel();
+        frame.add(contentPanel, BorderLayout.CENTER);
+
+        // Create Side Panel
+        JPanel sidePanel = createSidePanel();
+        frame.add(sidePanel, BorderLayout.WEST);
+
+        // Create Bottom Panel
+        JPanel bottomPanel = createBottomPanel();
+        frame.add(bottomPanel, BorderLayout.SOUTH);
+
+        // Make Frame Visible
+        frame.setLocationRelativeTo(null); // Center on screen
+        frame.setVisible(true);
+    }
+
+    private JPanel createHeaderPanel() {
+        JPanel headerPanel = new JPanel();
+        headerPanel.setLayout(new BorderLayout());
+        headerPanel.setBackground(PRIMARY_COLOR);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+        // Add Logo
+        ImageIcon logoIcon = new ImageIcon("C:\\Users\\tehma\\Desktop\\Sir_Fawad_agent\\Sir_Fawad_agent\\src\\main\\resources\\uet.png");    Image img = logoIcon.getImage();
+        Image resizedImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+        logoIcon = new ImageIcon(resizedImg);
+
+        // Set the logo image
+        logoLabel = new JLabel(logoIcon);
+
+        JLabel titleLabel = new JLabel("Course Automated Analyzer");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setForeground(Color.WHITE);
+
+        JPanel logoTitlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        logoTitlePanel.setBackground(PRIMARY_COLOR);
+        logoTitlePanel.add(logoLabel);
+        logoTitlePanel.add(titleLabel);
+
+        headerPanel.add(logoTitlePanel, BorderLayout.WEST);
+
+        return headerPanel;
+    }
+
+    private JPanel createContentPanel() {
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        contentPanel.setBackground(BG_COLOR);
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 20));
+
+        // Path display panel
+        JPanel pathPanel = new JPanel(new GridLayout(3, 1, 0, 10));
+        pathPanel.setBackground(BG_COLOR);
+
+        filePathLabel = createInfoLabel("Source: No folder selected");
+        savePathLabel = createInfoLabel("Save Location: Not selected");
+        quantPathLabel = createInfoLabel("Quantitative Source: Not selected");
+
+        pathPanel.add(filePathLabel);
+        pathPanel.add(savePathLabel);
+        pathPanel.add(quantPathLabel);
+
+        contentPanel.add(pathPanel, BorderLayout.NORTH);
 
         // Create Text Area with Scroll Pane
         textArea = new JTextArea();
         textArea.setEditable(false);
         textArea.setFont(new Font("Arial", Font.PLAIN, 14));
+        textArea.setBackground(Color.WHITE);
+        textArea.setForeground(TEXT_COLOR);
+        textArea.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
         scrollPane = new JScrollPane(textArea);
-        frame.add(scrollPane, BorderLayout.CENTER);
+        scrollPane.setBorder(BorderFactory.createLineBorder(SECONDARY_COLOR, 1));
 
-        // Create Bottom Panel
-        JPanel panel = new JPanel();
-        frame.add(panel, BorderLayout.SOUTH);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Create File Path Label
-        filePathLabel = new JLabel("No folder selected");
-        filePathLabel.setFont(new Font("Arial", Font.PLAIN, 20));
-        frame.add(filePathLabel, BorderLayout.NORTH);
-        savePathLabel = new JLabel("No save location selected");
-        savePathLabel.setFont(new Font("Arial", Font.PLAIN,     20));
-        frame.add(savePathLabel, BorderLayout.CENTER);
+        return contentPanel;
+    }
 
+    private JLabel createInfoLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Arial", Font.PLAIN, 14));
+        label.setForeground(TEXT_COLOR);
+        label.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(SECONDARY_COLOR, 1),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+        label.setBackground(Color.WHITE);
+        label.setOpaque(true);
+        return label;
+    }
 
-        // Create FileChooser Button
-        chooseFileButton = new JButton("Select Directory");
-        chooseFileButton.setFont(new Font("Arial", Font.BOLD, 14));
-        // Create Save Location Button
-        chooseSaveLocationButton = new JButton("Select Save Location");
-        chooseSaveLocationButton.setFont(new Font("Arial", Font.BOLD, 14));
+    private JPanel createSidePanel() {
+        JPanel sidePanel = new JPanel(new GridLayout(3, 1, 0, 20));
+        sidePanel.setBackground(BG_COLOR);
+        sidePanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 10));
 
-        choosequantitativesearch = new JButton("Quantitative");
-        choosequantitativesearch.setFont(new Font("Arial", Font.BOLD,14));
+        chooseFileButton = createStyledButton("Choose Path to Analyze", new ImageIcon(), PRIMARY_COLOR);
+        chooseSaveLocationButton = createStyledButton("Where to Save", new ImageIcon(), PRIMARY_COLOR);
+        chooseQuantitativeButton = createStyledButton("Quantitative Search", new ImageIcon(), PRIMARY_COLOR);
 
-
-        // Create Run Button
-        runMainButton = new JButton("Analyze");
-        runMainButton.setFont(new Font("Arial", Font.BOLD, 14));
-        runMainButton.setBackground(new Color(100, 149, 237));
-        runMainButton.setForeground(Color.WHITE);
-        runMainButton.setEnabled(false); // Initially disabled
-
-        // Create Exit Button
-        exitButton = new JButton("Click for Stopping after Text File Uploaded Prompt");
-        exitButton.setFont(new Font("Arial", Font.BOLD, 12));
-        exitButton.setBackground(new Color(220, 20, 60)); // Red color
-        exitButton.setForeground(Color.WHITE);
-        // Add Action Listener for FileChooser
+        // Add Action Listeners
         chooseFileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY); // Allow only folder selection
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 fileChooser.setAcceptAllFileFilterUsed(false);
 
                 int returnValue = fileChooser.showOpenDialog(frame);
@@ -92,39 +172,19 @@ class GUI {
                     File selectedFile = fileChooser.getSelectedFile();
                     if (selectedFile != null) {
                         selectedFilePath = selectedFile.getAbsolutePath();
-                        filePathLabel.setText("Selected: " + selectedFilePath);
-                        runMainButton.setEnabled(true); // Enable run button
-
+                        filePathLabel.setText("Source: " + selectedFilePath);
+                        chooseFileButton.setBackground(SUCCESS_COLOR);
+                        updateRunButtonState();
                     }
                 }
             }
         });
-        choosequantitativesearch.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY); // Allow only folder selection
-                fileChooser.setAcceptAllFileFilterUsed(false);
 
-                int returnValue = fileChooser.showOpenDialog(frame);
-
-                if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    if (selectedFile != null) {
-                        selectedQuantitativePath = selectedFile.getAbsolutePath();
-                        choosequantitativesearch.setBackground(Color.GREEN); // Change button color to green
-                        FilenameSimilarityCheck ok = new FilenameSimilarityCheck();
-                        ok.ft();
-
-                    }
-                }
-            }
-        });
         chooseSaveLocationButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY); // Allow only folder selection
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 fileChooser.setAcceptAllFileFilterUsed(false);
 
                 int returnValue = fileChooser.showOpenDialog(frame);
@@ -134,42 +194,194 @@ class GUI {
                     if (selectedFile != null) {
                         selectedSavePath = selectedFile.getAbsolutePath();
                         savePathLabel.setText("Save Location: " + selectedSavePath);
+                        chooseSaveLocationButton.setBackground(SUCCESS_COLOR);
+                        updateRunButtonState();
                     }
                 }
             }
         });
 
-        // Add Action Listener for Run Button
+        chooseQuantitativeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileChooser.setAcceptAllFileFilterUsed(false);
+
+                int returnValue = fileChooser.showOpenDialog(frame);
+
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    if (selectedFile != null) {
+                        selectedQuantitativePath = selectedFile.getAbsolutePath();
+                        quantPathLabel.setText("Quantitative Source: " + selectedQuantitativePath);
+                        chooseQuantitativeButton.setBackground(SUCCESS_COLOR);
+
+                        // Assuming the FilenameSimilarityCheck class exists
+                        try {
+                            FilenameSimilarityCheck ok = new FilenameSimilarityCheck();
+                            ok.ft();
+                        } catch (Exception ex) {
+                            showError("Error performing similarity check: " + ex.getMessage());
+                        }
+                    }
+                }
+            }
+        });
+
+        sidePanel.add(chooseFileButton);
+        sidePanel.add(chooseSaveLocationButton);
+        sidePanel.add(chooseQuantitativeButton);
+
+        return sidePanel;
+    }
+
+    private JPanel createBottomPanel() {
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        bottomPanel.setBackground(BG_COLOR);
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+
+        runMainButton = createStyledButton("Analyze", new ImageIcon(), ACCENT_COLOR);
+        runMainButton.setFont(new Font("Arial", Font.BOLD, 16));
+        runMainButton.setEnabled(false);
+
+        exitButton = createStyledButton("Exit", new ImageIcon(), DANGER_COLOR);
+        exitButton.setFont(new Font("Arial", Font.BOLD, 16));
+
+        // Add Action Listeners
         runMainButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!selectedFilePath.isEmpty() && !selectedSavePath.isEmpty()) {
-                    try {
-                        Main.main(new String[]{selectedFilePath, selectedSavePath});
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                    }
+                    textArea.append("Starting analysis...\n");
+                    runMainButton.setEnabled(false);
+
+                    // Use SwingWorker to run the analysis in the background
+                    SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                        @Override
+                        protected Void doInBackground() throws Exception {
+                            try {
+                                Main.main(new String[]{selectedFilePath, selectedSavePath});
+                                return null;
+                            } catch (Exception ex) {
+                                SwingUtilities.invokeLater(() -> {
+                                    showError("Error: " + ex.getMessage());
+                                });
+                                return null;
+                            }
+                        }
+
+                        @Override
+                        protected void done() {
+                            textArea.append("Analysis completed.\n");
+                            runMainButton.setEnabled(true);
+                        }
+                    };
+
+                    worker.execute();
                 } else {
-                    JOptionPane.showMessageDialog(frame, "Please select a directory and a save location first.", "Warning", JOptionPane.WARNING_MESSAGE);
+                    showWarning("Please select a directory and a save location first.");
                 }
             }
         });
-        // Add Action Listener for Exit Button
+
         exitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.exit(0); // Terminate the program
+                int result = JOptionPane.showConfirmDialog(
+                        frame,
+                        "Are you sure you want to exit?",
+                        "Exit Confirmation",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE
+                );
+
+                if (result == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
             }
         });
-        // Add Components to Panel
-        panel.add(chooseFileButton);
-        panel.add(chooseSaveLocationButton);
-        panel.add(runMainButton);
-        panel.add(exitButton);
-        panel.add(choosequantitativesearch);
 
-        // Make Frame Visible
-        frame.setVisible(true);
+        bottomPanel.add(runMainButton);
+        bottomPanel.add(exitButton);
+
+        return bottomPanel;
+    }
+
+    private JButton createStyledButton(String text, ImageIcon icon, Color color) {
+        JButton button = new JButton(text);
+        if (icon != null && icon.getIconWidth() > 0) {
+            button.setIcon(icon);
+        }
+
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+
+        // Add a bit of padding
+        button.setMargin(new Insets(10, 15, 10, 15));
+
+        // Add hover effect
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(darken(color, 0.1f));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(color);
+            }
+        });
+
+        return button;
+    }
+
+    private Color darken(Color color, float fraction) {
+        int red = Math.max(0, Math.round(color.getRed() * (1 - fraction)));
+        int green = Math.max(0, Math.round(color.getGreen() * (1 - fraction)));
+        int blue = Math.max(0, Math.round(color.getBlue() * (1 - fraction)));
+        return new Color(red, green, blue);
+    }
+
+    private void updateRunButtonState() {
+        runMainButton.setEnabled(!selectedFilePath.isEmpty() && !selectedSavePath.isEmpty());
+    }
+
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(
+                frame,
+                message,
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+
+    private void showWarning(String message) {
+        JOptionPane.showMessageDialog(
+                frame,
+                message,
+                "Warning",
+                JOptionPane.WARNING_MESSAGE
+        );
+    }
+
+    // Method to add text to the log
+    public void appendToLog(String text) {
+        textArea.append(text + "\n");
+        // Auto-scroll to bottom
+        textArea.setCaretPosition(textArea.getDocument().getLength());
+    }
+
+    // Method to update a custom logo if needed
+    public void setCustomLogo(ImageIcon logo) {
+        if (logo != null) {
+            logoLabel.setIcon(logo);
+            logoLabel.setText(""); // Remove text when using image
+        }
     }
 
     public static void main(String[] args) {
