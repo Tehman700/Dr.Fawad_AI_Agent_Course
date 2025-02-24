@@ -219,9 +219,10 @@ class GUI {
 
                         // Assuming the FilenameSimilarityCheck class exists
                         try {
-                            FilenameSimilarityCheck ok = new FilenameSimilarityCheck();
-                            ok.ft();
-                        } catch (Exception ex) {
+
+                            // WILL PUT SOMETHING HERE FOR QUANTITATIVE SEARCH   25-20-2025  AT 2:06 AM
+
+                } catch (Exception ex) {
                             showError("Error performing similarity check: " + ex.getMessage());
                         }
                     }
