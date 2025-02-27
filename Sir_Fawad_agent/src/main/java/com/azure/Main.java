@@ -692,9 +692,7 @@ class SecondGUI extends JFrame {
 
 
 public class Main {
-
     String vectorStoreId = "vs_p0tRLzmvpGhtMCim0PuAxgDM"; // Replace with your vector store ID
-
     // Method to list all files and directories in a given directory
     public static void listAllFilesAndDirectories(String directoryPath) {
         try {
@@ -715,7 +713,6 @@ public class Main {
             e.printStackTrace();
         }
     }
-
     // Method to check for specific files in the directory
     public static boolean checkForFiles(String directoryPath, String... fileNames) throws IOException {
         boolean allFilesPresent = true;
@@ -728,10 +725,8 @@ public class Main {
         }
         return allFilesPresent;
     }
-
     /// file creation for report/////// // THis portion is used to append to the file that is appended when response is generated
     ///  30-01-2025 at 1:34 PM
-
     private static void appendToFile(String filePath, String content, String fileType) {
         // Append content to the specified file
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(filePath), true))) {
@@ -742,7 +737,6 @@ public class Main {
             System.err.println("Error appending content to the " + fileType + " file: " + e.getMessage());
         }
     }
-
     private static final String FILE_PATHSS = "file_ids.txt";
     // Method to show auto-closing dialog
     private static void showAutoCloseDialog(String message, String title, int messageType) {
@@ -755,25 +749,19 @@ public class Main {
     }
     // Main method
     public static void main(String[] args) throws Exception {
-
         String qwer = "Analysis Report.md";
         for (int i = 0; i < 2; i++) {
             try (FileWriter writer = new FileWriter(qwer)) {
                 writer.write("");
                 showAutoCloseDialog("Analysis Report File Deleted for New Changes.!!! Task 01 Completed", "Deletion Complete", JOptionPane.INFORMATION_MESSAGE);
                 System.out.println("Cleared all contents of: " + qwer);
-
             } catch (IOException e) {
                 showAutoCloseDialog("Some Error Occurred while deleting Analysis Report File.!!! Task 01 Exception", "Deletion Error", JOptionPane.ERROR_MESSAGE);
                 System.err.println("An error occurred while clearing the file " + qwer);
                 e.printStackTrace();
             }
-
             qwer = "Analysis Report.txt";
-
         }
-
-
         String directoryPath = null;
         String savePath = null; // Add a variable to store the save path
         if (args.length > 0) {
@@ -785,13 +773,10 @@ public class Main {
             JOptionPane.showMessageDialog(null, "Please Provide Path for Files. It must be a Folder!!!", "Incomplete Path", JOptionPane.INFORMATION_MESSAGE);
             System.out.println("No File Path Provided");
         }
-
-
         Main main = new Main();
         OpenAISetup run_bot = new OpenAISetup();
         OpenAIFileUpload upload = new OpenAIFileUpload();
         VectorStoreFileDeleter delete_file = new VectorStoreFileDeleter();
-
         // BELOW IS THE IMPORTANT PORTION FOR APPENDING FILE'S IN A FILE AND THEN DELETING AGAIN, HANDLING
         // IF PROGRAM STOPS IN BETWEEN LIKE INTERNET OR BREAKING EXCEPTIONS  **** Changes made on 28-01-2025 at 6:06AM *****
         try {
@@ -803,7 +788,6 @@ public class Main {
                     lines.add(line);
                 }
             }
-
             // Process lines: Remove each line after reading
             while (!lines.isEmpty()) {
                 String lineToProcess = lines.get(0);
@@ -833,52 +817,34 @@ public class Main {
             // Show pop-up if an error occurs
             JOptionPane.showMessageDialog(null, "An error occurred during deletion: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-
         com.azure.DirectoryParser directoryParser = new DirectoryParser();
-
         ArrayList<String> filtered_Array = directoryParser.process_filteration(directoryPath);
-
         System.out.println("files\n" + filtered_Array);
-
         String file_1 = "";
         String file_2 = "";
-
         for (String S : filtered_Array) {
-
             String pair_files = S;
-
             String[] Pair_file_array = pair_files.split(",");
-
             file_1 = directoryParser.getFilesInFolder(directoryPath, Pair_file_array[0].trim());
-
             file_2 = directoryParser.getFilesInFolder(directoryPath, Pair_file_array[1].trim());
-
             System.out.println("\nFile_one_path: " + file_1);
             System.out.println("\nfile_two_path" + file_2);
-
             String fileId_1 = upload.associate_with_assistant(new File(file_1));
             String fileId_2 = upload.associate_with_assistant(new File(file_2));
-
             run_bot.process_bot();
             String response = "# " + Pair_file_array[0].trim() + "\n\n" + run_bot.contentValue + "\n\n# ---------------------------------------------------------------------\n";
             run_bot.contentValue = "";
-
             delete_file.deleteVectorStoreFile(main.vectorStoreId, fileId_1);
             delete_file.deleteVectorStoreFile(main.vectorStoreId, fileId_2);
-
             Thread.sleep(10000);
-
             // Append content to the specified file
             String markdownFilePath = "Analysis Report.md"; // Markdown file
             String textFilePath = "Analysis Report.txt"; // Text file
             String newContent = response + "\n\n\n";
-
             // Append the content to the Markdown file and Text file
             appendToFile(markdownFilePath, newContent, "Markdown");
             appendToFile(textFilePath, newContent, "Text");
-
             /// We also have to empty the text file which contains ID's   changes made on 28-01-2025      6:01 AM by Tehman
-
             try {
                 FileWriter obj = new FileWriter(FILE_PATHSS);
                 obj.write("");
@@ -887,13 +853,9 @@ public class Main {
             } catch (IOException e) {
                 System.out.println("An Error Occurred while Clearing the ID's File, Well System won't Stop!!!" + e.getMessage());
             }
-
             // In this portion we will transform the MD file to PDF File and then delete all the content of MD File, Implemented by Tehman on 29-01-2025 2:26AM
-
             MarkdownToPdfConverter objss = new MarkdownToPdfConverter();
             objss.changerss(savePath);
-
         }
-
     }
 }
